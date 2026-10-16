@@ -19,40 +19,24 @@ The output is designed for direct ingestion by downstream ticketing systems such
 ## Architecture
 
 ```
-Incoming ticket (plain text string)
-        │
-        ▼
-[ FastAPI endpoint — api.py ]          ← Milestone 4
-        │
-        ▼
-[ Embedding model ]                    ← converts ticket text to a query vector
-   all-MiniLM-L6-v2
-        │
-        ▼
-[ ChromaDB vector store ]              ← Milestone 1
-   semantic search → top 3 chunks
-        │
-        ▼
-[ Prompt template ]                    ← Milestone 2 & 3
-   injects retrieved chunks as context
-   enforces: answer only from context
-   enforces: return valid JSON
-        │
-        ▼
-[ LLM — Groq API ]                     ← Milestone 2
-   generates structured response
-        │
-        ▼
-[ JSON output parser ]                 ← Milestone 3
-   validates schema before returning
-        │
-        ▼
-{
-  "category": "...",
-  "priority": "...",
-  "response": "...",
-  "sources": [...]
-}
+
+Incoming ticket (string)
+        ↓
+Embedding model (all-MiniLM-L6-v2) — query vectorisation
+        ↓
+ChromaDB similarity search — top 3 relevant chunks retrieved
+        ↓
+format_context() — chunks formatted with source filenames
+        ↓
+ChatPromptTemplate — context + ticket slotted into system/human structure
+        ↓
+Groq LLM (openai/gpt-oss-20b) — grounded response generated
+        ↓
+StrOutputParser() — raw AIMessage extracted to plain string
+        ↓
+[Milestone 3] Output parser — validated JSON object
+        ↓
+[Milestone 4] FastAPI endpoint — 200 response returned to caller
 ```
 
 **Ingestion flow (run once, offline):**
@@ -163,7 +147,17 @@ can fix a response built on irrelevant context.
 
 **Milestone 2 — Retrieval and Prompt Engineering:**
 
-<!-- To be added -->
+```
+Building the retrieval chain taught me that hallucination prevention 
+starts in the prompt, not the model. By splitting the prompt into a 
+system message (standing rules and constraints) and a human message 
+(the ticket and retrieved context), the LLM is given a clear boundary 
+between what it is allowed to do and what the current request is. 
+The refusal phrase — a fixed, machine-readable string — means a 
+downstream system can detect unanswerable tickets and route them 
+to a human agent without any additional classification logic
+
+```
 
 **Milestone 3 — Structured Output:**
 
@@ -222,7 +216,7 @@ support-ticket-agent/
 ## Milestones
 
 - [x] Milestone 1 — Data Ingestion and Embedding
-- [ ] Milestone 2 — Retrieval and Prompt Engineering
+- [x] Milestone 2 — Retrieval and Prompt Engineering
 - [ ] Milestone 3 — Enforcing Structured Output
 - [ ] Milestone 4 — API Integration
 
