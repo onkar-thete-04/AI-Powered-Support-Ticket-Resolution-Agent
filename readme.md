@@ -115,21 +115,27 @@ Total vectors stored: 20
 
 >  Coming in Milestone 4
 
-```bash
-# uvicorn api:app --reload
+```
+How to Run
+
+### Example request
+curl -X POST http://localhost:8000/resolve \
+  -H "Content-Type: application/json" \
+  -d "{\"ticket\": \"I cannot log into my account, it says it is locked.\"}"
+
+### Expected response
+{
+  "category": "authentication",
+  "priority": "high",
+  "response": "Your account is temporarily locked...",
+  "sources": [
+    "knowledge_base\\login_issues.txt",
+    "knowledge_base\\resolved_ticket_003.txt"
+  ]
+}
 ```
 
-### 5. Send a test request
 
->  Coming in Milestone 4
-
-```bash
-# curl -X POST http://localhost:8000/resolve \
-#   -H "Content-Type: application/json" \
-#   -d '{"ticket": "I cannot log in. It says my account is locked."}'
-```
-
----
 
 
 
@@ -172,10 +178,26 @@ are required: prompt enforcement reduces malformed outputs, parser
 validation catches the ones that slip through.
 ```
 
-**Milestone 4 — API Integration:**
+**Milestone 4 — API Design and Resource Management**
 
-<!-- To be added -->
+```
 
+Loading the embedding model and ChromaDB connection at server startup
+rather than inside the endpoint function is the difference between a
+script and a service. A script reinitialises everything on every call —
+a service initialises once and serves every request from memory.
+Under load, repeated initialisation causes latency spikes and memory
+waste that compound with traffic.
+
+### Logging Strategy
+Logging the raw LLM response before parsing captures two failure modes
+the parsed output cannot: format failures (malformed JSON, extra text)
+where parsing raises an exception and no parsed output exists, and
+content failures (hallucinated policy details) where parsing succeeds
+but the generated text contains unsupported claims. The parsed output
+only proves structure — the raw log proves content.
+
+```
 ---
 
 ## Trade-offs
@@ -198,11 +220,20 @@ complete idea without blurring the embedding vector across multiple topics.
 
 ### LLM call latency
 
->  To be measured and documented after Milestone 2 is complete.
+Each request makes a synchronous call to the Groq API, which adds
+200–800ms of network latency per ticket. In a production system
+handling high ticket volume this becomes a bottleneck. Mitigations
+include async endpoint handlers, a request queue, response caching
+for repeated ticket patterns, or a faster local model for
+classification with the LLM reserved for response drafting only.
 
-<!-- Discuss: how long does the Groq API call take? What would this mean for a
-     production support system handling 500 tickets per hour?
-     What caching strategies could reduce repeated LLM calls for similar tickets? -->
+### Priority Classification
+The priority field is currently decided by the LLM, which produces
+inconsistent results even at temperature=0 — the same locked account
+ticket returned "high" in pipeline.py and "medium" via the API.
+A deterministic rule-based classifier (if category == "authentication"
+→ priority = "high") would be more reliable for a field a ticketing
+system routes on automatically.
 
 ---
 
@@ -227,5 +258,5 @@ support-ticket-agent/
 - [x] Milestone 1 — Data Ingestion and Embedding
 - [x] Milestone 2 — Retrieval and Prompt Engineering
 - [x] Milestone 3 — Enforcing Structured Output
-- [ ] Milestone 4 — API Integration
+- [x] Milestone 4 — API Integration
 
