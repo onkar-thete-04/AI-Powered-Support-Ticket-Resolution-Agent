@@ -86,7 +86,7 @@ Create a `.env` file in the project root:
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-> ⚠️ Never commit your `.env` file. It is listed in `.gitignore`.
+>  Never commit your `.env` file. It is listed in `.gitignore`.
 
 ### 3. Run the ingestion script
 
@@ -113,7 +113,7 @@ Total vectors stored: 20
 
 ### 4. Start the API server
 
-> 🚧 Coming in Milestone 4
+>  Coming in Milestone 4
 
 ```bash
 # uvicorn api:app --reload
@@ -121,7 +121,7 @@ Total vectors stored: 20
 
 ### 5. Send a test request
 
-> 🚧 Coming in Milestone 4
+>  Coming in Milestone 4
 
 ```bash
 # curl -X POST http://localhost:8000/resolve \
@@ -198,7 +198,7 @@ complete idea without blurring the embedding vector across multiple topics.
 
 ### LLM call latency
 
-> 🚧 To be measured and documented after Milestone 2 is complete.
+>  To be measured and documented after Milestone 2 is complete.
 
 <!-- Discuss: how long does the Groq API call take? What would this mean for a
      production support system handling 500 tickets per hour?
@@ -226,6 +226,6 @@ support-ticket-agent/
 
 - [x] Milestone 1 — Data Ingestion and Embedding
 - [x] Milestone 2 — Retrieval and Prompt Engineering
-- [ ] Milestone 3 — Enforcing Structured Output
+- [x] Milestone 3 — Enforcing Structured Output
 - [ ] Milestone 4 — API Integration
 
