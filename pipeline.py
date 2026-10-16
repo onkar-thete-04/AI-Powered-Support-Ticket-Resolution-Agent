@@ -3,9 +3,77 @@ from dotenv import load_dotenv
 # load_dotenv reads the .env file and injects its values into os.environ
 # so GROQ_API_KEY becomes available as os.environ["GROQ_API_KEY"]
 
+import json
 import chromadb
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+import pydantic
+
+from pydantic import BaseModel, Field
+from typing import List, Literal
+from langchain_core.output_parsers import JsonOutputParser
+
+# ── THE JSON SCHEMA ────────────────────────────────────────────────────────────
+class TicketResolution(BaseModel):
+    """
+    This class is the contract for every response the pipeline produces.
+    Pydantic enforces that all fields are present and correctly typed.
+    A downstream system (Jira, Zendesk) can rely on this structure unconditionally.
+    """
+
+    category: Literal[
+        "authentication",
+        "billing",
+        "api",
+        "account",
+        "integration",
+        "data",
+        "other"
+    ] = Field(
+        description="The category of the support ticket. Choose the single most relevant category."
+    )
+    # Literal restricts the LLM to exactly these values
+    # Without it, the LLM might output "login" instead of "authentication"
+    # breaking any downstream logic that switches on category
+
+    priority: Literal["low", "medium", "high"] = Field(
+        description=(
+            "Priority level. Use 'high' for account access issues or billing disputes, "
+            "'medium' for general how-to questions, 'low' for informational queries."
+        )
+    )
+    # Inline guidance in the Field description helps the LLM
+    # make consistent priority decisions without extra prompt text
+
+    response: str = Field(
+        description=(
+            "The full drafted response to send to the customer. "
+            "Must be based strictly on the retrieved context. "
+            "If no relevant context was found, use exactly: "
+            "'I don't have enough information in the knowledge base to answer this ticket.'"
+        )
+    )
+    # The refusal phrase is now enforced at the schema level too —
+    # not just in the system message
+
+    sources: List[str] = Field(
+        description=(
+            "List of source document filenames used to construct the response. "
+            "Use only filenames that appear in the CONTEXT section. "
+            "If no relevant context was found, return an empty list."
+        )
+    )
+    # Empty list for out-of-scope tickets is machine-readable
+    # A downstream system can check len(sources) == 0 to flag for human review
+
+# ── INITIALISE THE PARSER ──────────────────────────────────────────────────────
+parser = JsonOutputParser(pydantic_object=TicketResolution)
+# Passing the Pydantic class tells the parser exactly what to validate against
+# It also generates format instructions that we inject into the prompt in Cell 2
+
+print(" Output schema defined")
+print(f"   Fields: {list(TicketResolution.model_fields.keys())}")
+
 
 # ── STEP 1: LOAD ENVIRONMENT VARIABLES ────────────────────────────────────────
 load_dotenv()
