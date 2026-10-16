@@ -159,9 +159,18 @@ to a human agent without any additional classification logic
 
 ```
 
-**Milestone 3 — Structured Output:**
+**Milestone 3 — Structured Output and Schema Enforcement**
 
-<!-- To be added -->
+```
+Pydantic enforces two things a plain dict cannot: it rejects values
+outside the allowed set (Literal["low", "medium", "high"] means
+"urgent" raises a validation error immediately) and it type-checks
+every field at parse time. The format_instructions injection is not
+redundant with the parser — the LLM needs the schema before it
+generates the response, while the parser validates after. Both layers
+are required: prompt enforcement reduces malformed outputs, parser
+validation catches the ones that slip through.
+```
 
 **Milestone 4 — API Integration:**
 
