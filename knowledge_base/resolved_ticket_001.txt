@@ -1,0 +1,5 @@
+Resolved Ticket #1042 — Charged After Cancellation
+Customer reported being charged after believing their account was cancelled.
+Investigation: The customer had cancelled an add-on, not the main subscription.
+Resolution: Agent guided customer to Settings > Billing > Cancel Subscription. Full refund issued — charge was within the 14-day refund window.
+Tags: billing, refund, cancellation, subscription

@@ -1,0 +1,8 @@
+Setting Up Two-Factor Authentication (2FA)
+To enable 2FA:
+1. Go to Settings > Security > Two-Factor Authentication.
+2. Click Enable 2FA.
+3. Scan the QR code with Google Authenticator or Authy.
+4. Enter the 6-digit code to confirm.
+5. Save your backup codes securely — these are your recovery method if you lose your phone.
+To disable 2FA: Settings > Security > Two-Factor Authentication > Disable. Confirmation with your current code is required.

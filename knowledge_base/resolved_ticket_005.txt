@@ -1,0 +1,5 @@
+Resolved Ticket #1389 — Slack Integration Stopped Posting
+Customer reported Slack integration had stopped sending notifications.
+Investigation: Slack workspace admin had rotated OAuth tokens, invalidating the existing connection.
+Resolution: Agent instructed customer to go to Settings > Integrations > Slack, disconnect, and reconnect via OAuth to generate a fresh token. Integration resumed immediately.
+Tags: integration, Slack, OAuth, token, disconnect

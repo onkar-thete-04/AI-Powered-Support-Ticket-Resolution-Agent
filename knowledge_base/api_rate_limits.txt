@@ -1,0 +1,8 @@
+API Rate Limits and Quotas
+All API plans are subject to rate limiting to ensure fair usage.
+Standard Plan: 100 requests per minute, 10,000 requests per day.
+Pro Plan: 500 requests per minute, 100,000 requests per day.
+Enterprise Plan: Custom limits — contact your account manager.
+If you exceed your rate limit, the API returns a 429 Too Many Requests status code.
+Resolution: implement exponential backoff in your client and wait before retrying.
+If you consistently hit limits, consider upgrading your plan or requesting a quota increase.

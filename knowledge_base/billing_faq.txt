@@ -1,0 +1,9 @@
+Billing and Payment FAQ
+Q: When am I charged?
+A: Subscriptions are billed on the first day of each billing cycle. Annual plans are charged once per year.
+Q: What payment methods do you accept?
+A: We accept Visa, Mastercard, American Express, and PayPal. Bank transfers are available for Enterprise plans only.
+Q: Can I get a refund?
+A: Refunds are available within 14 days of the initial purchase for new subscriptions. Renewals are non-refundable.
+Q: How do I update my payment method?
+A: Go to Settings > Billing > Payment Methods. Click Update and enter new card details.

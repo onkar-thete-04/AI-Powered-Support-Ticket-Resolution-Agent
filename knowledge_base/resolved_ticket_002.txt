@@ -1,0 +1,5 @@
+Resolved Ticket #1187 — API Returning 429 Errors
+Customer reported API calls failing intermittently with status 429.
+Investigation: Customer was on Standard plan making 150 requests per minute, exceeding the 100/min limit.
+Resolution: Agent advised upgrading to Pro plan or adding exponential backoff on the client side. Customer implemented a client-side queue. Issue resolved.
+Tags: API, rate limit, 429, developer, Standard plan

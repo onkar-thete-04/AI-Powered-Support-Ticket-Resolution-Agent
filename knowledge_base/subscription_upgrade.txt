@@ -1,0 +1,5 @@
+Upgrading or Downgrading Your Subscription
+To change your plan: Settings > Billing > Current Plan > Change Plan.
+Upgrades take effect immediately. You are charged a prorated amount for the rest of the current cycle.
+Downgrades take effect at the start of the next billing cycle. You keep current features until then.
+Warning: Downgrading may cause data or feature loss if your usage exceeds the lower plan limits. A warning is shown before you confirm.

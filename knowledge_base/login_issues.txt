@@ -1,0 +1,7 @@
+Troubleshooting Login Problems
+Issue: Cannot log in with correct credentials.
+Fix: Clear browser cache and cookies, try incognito mode, or use a different browser.
+Issue: Account locked after failed attempts.
+Fix: Accounts lock for 15 minutes after 5 failed login attempts. Wait 15 minutes, then use the Forgot Password flow.
+Issue: SSO not working.
+Fix: Confirm with your IT admin that SSO is active. Ensure your email domain is registered under your organization SSO settings. Contact support with your organization ID.

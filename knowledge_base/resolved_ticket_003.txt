@@ -1,0 +1,5 @@
+Resolved Ticket #1203 — Account Locked After Password Attempts
+Customer could not log in after multiple failed attempts.
+Investigation: Customer was unaware of the 15-minute auto-unlock window after 5 failed attempts.
+Resolution: Agent confirmed the lock would expire and directed customer to the Forgot Password flow. Login successful after reset.
+Tags: login, locked, password, authentication

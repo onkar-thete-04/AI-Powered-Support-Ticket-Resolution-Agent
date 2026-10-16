@@ -1,0 +1,6 @@
+Exporting Your Data
+Export all account data from Settings > Data > Export.
+Supported formats: CSV and JSON.
+Processing time: Under 15 minutes for accounts with fewer than 10,000 records. Larger exports take up to 2 hours.
+A secure download link is emailed when the export is ready. Links expire after 24 hours.
+Important: Data export is available on Pro and Enterprise plans only. Standard plan users must upgrade to access this feature.

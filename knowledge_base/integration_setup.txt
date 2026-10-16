@@ -1,0 +1,7 @@
+Setting Up Third-Party Integrations
+Supported integrations: Slack, Jira, Salesforce, Zapier.
+Setup: Settings > Integrations > choose integration > authorize via OAuth.
+Troubleshooting:
+- Integration stopped working: disconnect and reconnect to refresh the OAuth token.
+- Token revoked by the third-party: reauthenticate from their side first.
+- Jira specifically: ensure the API token has project-level write access.

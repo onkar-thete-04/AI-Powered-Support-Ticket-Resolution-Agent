@@ -1,0 +1,9 @@
+Why Was My Account Suspended?
+Accounts may be suspended for three reasons:
+1. Payment failure: If a charge fails and is not resolved within 7 days, the account suspends automatically.
+2. Terms of service violation: Automated abuse, scraping, or reselling access.
+3. Security hold: Unusual login activity triggers a temporary hold.
+Reactivation:
+- Payment issue: Update payment in Settings > Billing. Account reactivates within 1 hour.
+- Security hold: Respond to the verification email sent to your registered address.
+- ToS violation: Contact support with your account ID. Reviews take 48 hours.

@@ -1,0 +1,5 @@
+Resolved Ticket #1301 — Data Export Never Arrived
+Customer initiated a data export 3 hours prior and received no email.
+Investigation: Customer was on Standard plan. Data export is a Pro and Enterprise feature only. The export silently failed due to plan restriction.
+Resolution: Agent informed customer of the plan limitation and escalated to billing team for plan upgrade discussion.
+Tags: export, Standard plan, feature access, billing
