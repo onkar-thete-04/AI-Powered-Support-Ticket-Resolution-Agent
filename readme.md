@@ -150,11 +150,16 @@ Total vectors stored: 20
 
 
 **Milestone 1 — Embeddings and Chunking:**
-
-<!-- Write 3–4 sentences here after passing the Milestone 1 checkpoint:
-     - What did you learn about why chunking strategy matters?
-     - What surprised you about how embedding models represent meaning?
-     - What would you do differently if the documents were longer or multilingual? -->
+```
+Embeddings convert text into vectors — lists of numbers that encode meaning
+so that semantically similar text produces numerically similar vectors.
+The same embedding model must be used for both ingestion and querying,
+because different models produce incompatible coordinate systems — even if
+their vector dimensions match, similarity scores become meaningless.
+Retrieval quality is the first line of defence against hallucination:
+if the wrong chunks come back from ChromaDB, no amount of prompt engineering
+can fix a response built on irrelevant context.
+```
 
 **Milestone 2 — Retrieval and Prompt Engineering:**
 
