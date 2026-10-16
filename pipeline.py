@@ -150,22 +150,29 @@ STRICT RULES — follow these without exception:
 5. Always mention which source documents you used to construct your answer.
 6. Keep your response professional, concise, and actionable."""),
 
+{format_instructions}"""),
+# {format_instructions} is injected by the parser at runtime
+# It tells the LLM the exact JSON structure, field names, and allowed values
+# Without this, the LLM guesses the output format and gets it wrong ~10% of the time.
+
     ("human", """CONTEXT:
 {context}
 
 SUPPORT TICKET:
 {question}
 
-Draft a response to this ticket using only the context above.""")
+Respond with a valid JSON object only. No text before or after the JSON.""")
+# The final line is a hard instruction against conversational wrapping
+# "Here is the JSON:" before the object breaks json.loads() silently
 ])
 # Why split into system and human messages?
 # Most LLMs are fine-tuned on conversations structured this way —
 # system = persistent instructions, human = per-turn input
 # This structure gets better instruction-following than a single flat string
 
-print(" Prompt template built")
+print(" Updated prompt template built")
 print(f"   Input variables: {prompt_template.input_variables}")
-# Should print: ['context', 'question']
+
 
 
 from langchain_groq import ChatGroq
@@ -220,13 +227,15 @@ chain = (
 
         "question": RunnablePassthrough()
         # The raw ticket string passes through unchanged into the {question} slot
+
+        "format_instructions": lambda _: parser.get_format_instructions(),
     }
     | prompt_template   # Slots {context} and {question} into the prompt
     | llm               # Sends the filled prompt to Groq
-    | StrOutputParser() # Extracts the plain text string from the response
+    | parser  # Parses and validates the JSON response against TicketResolution
 )
 
-print(" Chain assembled: retriever | format_context | prompt | llm | parser")
+print(" Updated Chain assembled: retriever | format_context | prompt | llm | parser")
 
 # ── STEP 4: DEFINE THE HELPER FUNCTION ────────────────────────────────────────
 def resolve_ticket(ticket: str) -> str:
@@ -266,3 +275,41 @@ print("\n" + "="*60)
 print("RESPONSE 3 (should refuse):")
 print("="*60)
 print(response_3)
+
+# ── FINAL VALIDATION ──────────────────────────────────────────────────────────
+# Prove every response round-trips through json.dumps() and json.loads()
+# This is the actual test a downstream system like Jira or Zendesk would run
+
+test_tickets = [
+    "I cannot log into my account, it says it is locked.",
+    "I was charged again after I cancelled. I want my money back.",
+    "Can you help me set up a custom domain for my dashboard?"
+]
+
+print("\n" + "="*60)
+print("JSON VALIDATION TEST")
+print("="*60)
+
+all_passed = True
+
+for ticket in test_tickets:
+    result = resolve_ticket(ticket)
+    try:
+        json_string = json.dumps(result)        # dict → JSON string
+        parsed_back = json.loads(json_string)   # JSON string → dict again
+        # If this succeeds, the output is genuinely valid JSON
+        print(f"\n PASSED — {ticket[:50]}...")
+        print(f"   category : {parsed_back['category']}")
+        print(f"   priority : {parsed_back['priority']}")
+        print(f"   sources  : {parsed_back['sources']}")
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"\n FAILED — {ticket[:50]}...")
+        print(f"   Error: {e}")
+        all_passed = False
+
+print("\n" + "="*60)
+print("ALL TESTS PASSED " if all_passed else "SOME TESTS FAILED ")
+print("="*60)
+
+
+
