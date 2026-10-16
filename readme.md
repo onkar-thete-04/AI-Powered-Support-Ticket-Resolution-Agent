@@ -1,0 +1,223 @@
+# AI-Powered Support Ticket Resolution Agent
+
+---
+
+## Overview
+
+A Retrieval-Augmented Generation (RAG) pipeline built for SaaS customer support automation.
+
+The system accepts an incoming support ticket as a plain text string, searches a vector database of internal knowledge base articles and past resolved tickets for semantically relevant context, and uses a large language model to produce a structured JSON response containing a category label, priority level, a drafted reply grounded strictly in the retrieved context, and the source documents cited.
+
+The output is designed for direct ingestion by downstream ticketing systems such as Jira or Zendesk.
+
+**Domain:** SaaS customer support — billing, authentication, API usage, account management, integrations.
+
+**Stack:** Python · LangChain · ChromaDB · sentence-transformers · FastAPI · Groq (LLM)
+
+---
+
+## Architecture
+
+```
+Incoming ticket (plain text string)
+        │
+        ▼
+[ FastAPI endpoint — api.py ]          ← Milestone 4
+        │
+        ▼
+[ Embedding model ]                    ← converts ticket text to a query vector
+   all-MiniLM-L6-v2
+        │
+        ▼
+[ ChromaDB vector store ]              ← Milestone 1
+   semantic search → top 3 chunks
+        │
+        ▼
+[ Prompt template ]                    ← Milestone 2 & 3
+   injects retrieved chunks as context
+   enforces: answer only from context
+   enforces: return valid JSON
+        │
+        ▼
+[ LLM — Groq API ]                     ← Milestone 2
+   generates structured response
+        │
+        ▼
+[ JSON output parser ]                 ← Milestone 3
+   validates schema before returning
+        │
+        ▼
+{
+  "category": "...",
+  "priority": "...",
+  "response": "...",
+  "sources": [...]
+}
+```
+
+**Ingestion flow (run once, offline):**
+
+```
+knowledge_base/*.txt
+        │
+        ▼
+[ ingest.py ]
+  Load → Chunk (500 chars / 50 overlap) → Embed → Store
+        │
+        ▼
+chroma_db/  (persists to disk)
+```
+
+---
+
+## How to Run
+
+### Prerequisites
+
+- Python 3.9 or higher
+- A free Groq API key — sign up at https://console.groq.com (no credit card required)
+
+### 1. Clone the repository and set up environment
+
+```bash
+git clone https://github.com/<your-username>/support-ticket-agent.git
+cd support-ticket-agent
+
+python -m venv venv
+
+# Mac / Linux
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+### 2. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+> ⚠️ Never commit your `.env` file. It is listed in `.gitignore`.
+
+### 3. Run the ingestion script
+
+This reads all documents from `knowledge_base/`, chunks them, embeds them using
+`all-MiniLM-L6-v2`, and stores the vectors in a local ChromaDB database.
+
+```bash
+python ingest.py
+```
+
+Expected output:
+```
+Created 15 documents in 'knowledge_base/'
+Loaded 15 raw documents
+Split into 20 chunks
+Average chunk size: 358.95 characters
+Embedding model loaded
+Vector store created at 'chroma_db/'
+Total vectors stored: 20
+```
+
+> The first run downloads the embedding model (~80MB). Subsequent runs use the local cache.
+> You only need to re-run `ingest.py` if the source documents in `knowledge_base/` change.
+
+### 4. Start the API server
+
+> 🚧 Coming in Milestone 4
+
+```bash
+# uvicorn api:app --reload
+```
+
+### 5. Send a test request
+
+> 🚧 Coming in Milestone 4
+
+```bash
+# curl -X POST http://localhost:8000/resolve \
+#   -H "Content-Type: application/json" \
+#   -d '{"ticket": "I cannot log in. It says my account is locked."}'
+```
+
+---
+
+
+
+**Milestone 1 — Embeddings and Chunking:**
+
+<!-- Write 3–4 sentences here after passing the Milestone 1 checkpoint:
+     - What did you learn about why chunking strategy matters?
+     - What surprised you about how embedding models represent meaning?
+     - What would you do differently if the documents were longer or multilingual? -->
+
+**Milestone 2 — Retrieval and Prompt Engineering:**
+
+<!-- To be added -->
+
+**Milestone 3 — Structured Output:**
+
+<!-- To be added -->
+
+**Milestone 4 — API Integration:**
+
+<!-- To be added -->
+
+---
+
+## Trade-offs
+
+### Chunking strategy
+
+The pipeline uses `RecursiveCharacterTextSplitter` with `chunk_size=500` and
+`chunk_overlap=50`. This was chosen because the source documents are short-to-medium
+SaaS support articles in plain English, where 500 characters captures roughly one
+complete idea without blurring the embedding vector across multiple topics.
+
+**Limitations:**
+- A purely character-based split does not respect semantic boundaries — a 501-character
+  article splits into two chunks even if the second chunk is only one sentence, which
+  can make that sentence's vector less meaningful without its surrounding context.
+- Larger documents (e.g. a 3,000-character policy PDF) would need a larger `chunk_size`
+  or a semantic chunking strategy (splitting on paragraph breaks or headings first).
+- There is no evaluation metric in place to measure retrieval quality — the chunk size
+  was chosen by reasoning, not by measuring precision/recall on a held-out query set.
+
+### LLM call latency
+
+> 🚧 To be measured and documented after Milestone 2 is complete.
+
+<!-- Discuss: how long does the Groq API call take? What would this mean for a
+     production support system handling 500 tickets per hour?
+     What caching strategies could reduce repeated LLM calls for similar tickets? -->
+
+---
+
+## Project Structure
+
+```
+support-ticket-agent/
+├── knowledge_base/          # 15 source .txt documents (KB articles + resolved tickets)
+├── chroma_db/               # ChromaDB vector store (auto-generated by ingest.py)
+├── ingest.py                # Milestone 1 — load, chunk, embed, store
+├── pipeline.py              # Milestone 2 & 3 — retrieval, prompting, structured output
+├── api.py                   # Milestone 4 — FastAPI endpoint
+├── .env                     # API keys (not committed)
+├── requirements.txt         # Pinned dependencies
+└── README.md
+```
+
+---
+
+## Milestones
+
+- [x] Milestone 1 — Data Ingestion and Embedding
+- [ ] Milestone 2 — Retrieval and Prompt Engineering
+- [ ] Milestone 3 — Enforcing Structured Output
+- [ ] Milestone 4 — API Integration
+
